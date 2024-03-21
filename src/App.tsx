@@ -2,10 +2,11 @@ import { useEffect, useState, useRef } from "react";
 import OpenAI from "openai";
 import { apikey } from "./openai-key.ts";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 // import ReactMarkdown from 'react-markdown';
 
 const gptmodel = "gpt-4-0125-preview";
-const localStrageKey = "chat-history"
+const localStrageKey = "chat-history";
 
 const openai = new OpenAI({
   apiKey: apikey, // This is the default and can be omitted
@@ -20,13 +21,13 @@ function App() {
   });
   const messageEndRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState<number>(0);
-  const activeListCss = "flex p-3 bg-slate-600";
-  const inactiveListCss = "flex p-3 hover:cursor-pointer hover:bg-slate-600";
 
   // chat履歴の読み込み
   useEffect(() => {
-    const chatHistory = JSON.parse(localStorage.getItem(localStrageKey) || `{"list":[]}`);
-    setChats(chatHistory)
+    const chatHistory = JSON.parse(
+      localStorage.getItem(localStrageKey) || `{"list":[]}`
+    );
+    setChats(chatHistory);
     // fetch("./chat-history.json")
     //   .then((res) => res.json())
     //   .then((data) => setChats(data));
@@ -34,7 +35,7 @@ function App() {
 
   // 最下部までスクロール
   useEffect(() => {
-    scrollToLatest()
+    scrollToLatest();
   }, [streamAnswer, activeIdx, query]);
 
   const addNewChat = () => {
@@ -44,19 +45,42 @@ function App() {
     setActiveIdx(0);
   };
 
+  const saveChat = () => {
+    // ローカルストレージに保存
+    localStorage.setItem(localStrageKey, JSON.stringify(chats));
+  };
+
+  // サイドバーの項目削除
+  const delIndex = (idx: number) => {
+    if (!window.confirm("Delete Chat?")) return;
+
+    const curchat = { ...chats };
+    curchat.list.splice(idx, 1);
+    setChats(curchat);
+
+    // インデックス再選択
+    const newidx = curchat.list.length > idx ? idx : curchat.list.length - 1;
+    console.log(curchat.list.length, idx, newidx);
+    setActiveIdx(newidx);
+
+    // 保存
+    saveChat();
+  };
+
   const scrollToLatest = () => {
     messageEndRef?.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const postQuery = async () => {
-    const curchat = {...chats};
+    const curchat = { ...chats };
     curchat.list[activeIdx].chat.push({ role: "user", content: query });
     setChats(curchat);
     setQuery("");
 
     const stream = await openai.chat.completions.create({
       model: gptmodel,
-      messages: chats.list[activeIdx].chat as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+      messages: chats.list[activeIdx]
+        .chat as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
       stream: true,
     });
 
@@ -71,14 +95,12 @@ function App() {
 
     setStreamAnswer("");
     setChats(curchat);
- 
+
     // チャット名がNew Chatの場合はタイトルを付ける
     if (curchat.list[activeIdx].title === "New Chat") {
       await setChatTitle();
     }
-
-    // ローカルストレージに保存
-    localStorage.setItem(localStrageKey, JSON.stringify(chats));
+    saveChat();
   };
 
   const setChatTitle = async () => {
@@ -88,14 +110,15 @@ function App() {
         {
           role: "user",
           content:
-            "以下の文章のタイトルを日本語で最大10文字で簡潔に付けてください。括弧は不要です。\n" + query,
+            "以下の文章のタイトルを日本語で最大10文字で簡潔に付けてください。括弧は不要です。\n" +
+            query,
         },
       ],
     });
 
     const title = completion.choices[0].message.content;
     if (title) {
-      const curchat = {...chats};
+      const curchat = { ...chats };
       curchat.list[activeIdx].title = title;
       setChats(curchat);
     }
@@ -112,24 +135,30 @@ function App() {
     <div className="flex h-screen overflow-hidden text-white whitespace-pre-wrap whitespace-break-spaces">
       {/* sidebar */}
       <div className="bg-slate-800 overflow-auto w-52">
-        <div className="italic m-3 text-xl">Private ChatGPT</div>
-        <div
-          className="py-5 text-center hover:bg-slate-600 hover:cursor-pointer"
-          onClick={() => addNewChat()}
-        >
-          <AddIcon /> Add new chat
-        </div>
+        <div className="italic text-center m-3 mb-5 text-xl">Private ChatGPT</div>
         <ul>
+          <li
+            className="flex p-3 text-green-500 hover:bg-slate-600 hover:cursor-pointer"
+            onClick={() => addNewChat()}
+          >
+            <AddIcon /> Add New Chat
+          </li>
           {chats.list.reverse().map((value, key) => {
             return (
               <li
                 key={key}
-                className={key === activeIdx ? activeListCss : inactiveListCss}
-                onClick={() => {
-                  setActiveIdx(key)
-                }}
+                className={`flex p-3 ${
+                  key === activeIdx
+                    ? "bg-slate-600"
+                    : "hover:cursor-pointer hover:bg-slate-600"
+                }`}
+                onClick={() => setActiveIdx(key)}
               >
                 {value.title}
+                <DeleteOutlineIcon
+                  className="p-1 ml-auto hover:text-red-500 hover:cursor-pointer hover:p-0"
+                  onClick={() => delIndex(key)}
+                />
               </li>
             );
           })}
@@ -160,7 +189,7 @@ function App() {
             <div className="p-2">{streamAnswer}</div>
           </div>
           {/* 自動スクロール用のダミー要素 */}
-          <div id="lastelment" ref={messageEndRef}/>
+          <div id="lastelment" ref={messageEndRef} />
         </div>
         <textarea
           className="bg-slate-200 rounded-lg p-1 m-2 text-black"
