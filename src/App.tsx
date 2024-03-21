@@ -18,7 +18,7 @@ function App() {
   const [chats, setChats] = useState({
     list: [{ title: "", chat: [{ role: "", content: "" }] }],
   });
-  const messageEndRef = useRef<HTMLDivElement>();
+  const messageEndRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState<number>(0);
   const activeListCss = "flex p-3 bg-slate-600";
   const inactiveListCss = "flex p-3 hover:cursor-pointer hover:bg-slate-600";
@@ -56,7 +56,7 @@ function App() {
 
     const stream = await openai.chat.completions.create({
       model: gptmodel,
-      messages: chats.list[activeIdx].chat,
+      messages: chats.list[activeIdx].chat as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
       stream: true,
     });
 
@@ -65,7 +65,6 @@ function App() {
     for await (const chunk of stream) {
       answer += chunk.choices[0]?.delta?.content || "";
       setStreamAnswer(answer);
-      scrollToLatest();
     }
 
     curchat.list[activeIdx].chat.push({ role: "assistant", content: answer });
@@ -102,7 +101,7 @@ function App() {
     }
   };
 
-  const enterSubmit = (e) => {
+  const enterSubmit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key == "Enter" && !e.shiftKey) {
       postQuery();
       e.preventDefault();
@@ -128,7 +127,6 @@ function App() {
                 className={key === activeIdx ? activeListCss : inactiveListCss}
                 onClick={() => {
                   setActiveIdx(key)
-                  scrollToLatest()
                 }}
               >
                 {value.title}
