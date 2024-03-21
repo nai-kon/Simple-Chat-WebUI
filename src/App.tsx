@@ -192,7 +192,7 @@ function App() {
           <div id="lastelment" ref={messageEndRef} />
         </div>
         <textarea
-          className="bg-slate-200 rounded-lg p-1 m-2 text-black"
+          className="bg-slate-200 rounded-lg p-1 m-2 text-black resize-none"
           value={query}
           rows={3}
           onChange={(e) => setQuery(e.target.value)}
