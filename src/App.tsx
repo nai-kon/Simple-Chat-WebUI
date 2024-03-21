@@ -141,7 +141,7 @@ function App() {
             className="flex p-3 text-green-500 hover:bg-slate-600 hover:cursor-pointer"
             onClick={() => addNewChat()}
           >
-            <AddIcon /> Add New Chat
+            <AddIcon /> 新しいチャット
           </li>
           {chats.list.reverse().map((value, key) => {
             return (
