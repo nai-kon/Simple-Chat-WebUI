@@ -77,10 +77,11 @@ function App() {
     setChats(curchat);
     setQuery("");
 
+    // 全ての会話履歴を投げると入力token量が凄い事になるので過去9件に制限
+    const last10chats = chats.list[activeIdx].chat.slice(-9);
     const stream = await openai.chat.completions.create({
       model: gptmodel,
-      messages: chats.list[activeIdx]
-        .chat as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+      messages: last10chats as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
       stream: true,
     });
 
