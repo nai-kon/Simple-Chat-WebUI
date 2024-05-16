@@ -5,7 +5,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 // import ReactMarkdown from 'react-markdown';
 
-const gptmodel = "gpt-4-0125-preview";
+const gptmodel = "gpt-4o";
 const localStrageKey = "chat-history";
 
 const openai = new OpenAI({
