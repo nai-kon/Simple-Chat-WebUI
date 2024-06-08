@@ -8,6 +8,7 @@ OpenAIのGPT-4のAPIを叩くChatGPT風アプリ。最近ChatGPTの利用頻度�
 ## Project setup
 ```
 npm install
+echo 'export const apikey = "XXXXXX";' > src/openai-key.ts
 ```
 
 ### Compiles and hot-reloads for development
