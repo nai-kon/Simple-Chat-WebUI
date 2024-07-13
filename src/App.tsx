@@ -3,10 +3,16 @@ import OpenAI from "openai";
 import { apikey } from "./openai-key.ts";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-// import ReactMarkdown from 'react-markdown';
+import { Convert } from "easy-currencies";
 
+
+// import ReactMarkdown from 'react-markdown';
 const gptmodel = "gpt-4o";
 const localStrageKey = "chat-history";
+
+// pricing per token of GPT-4o (https://openai.com/api/pricing/)
+const input_doller_per_token = 5 / 1000000
+const output_doller_per_token = 15 / 1000000
 
 const openai = new OpenAI({
   apiKey: apikey, // This is the default and can be omitted
@@ -17,7 +23,7 @@ function App() {
   const [query, setQuery] = useState<string>("");
   const [streamAnswer, setStreamAnswer] = useState<string>("");
   const [chats, setChats] = useState({
-    list: [{ title: "", chat: [{ role: "", content: "" }] }],
+    list: [{ title: "", chat: [{ role: "", content: "" , cost: 0}] }],
   });
   const messageEndRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState<number>(0);
@@ -73,26 +79,35 @@ function App() {
 
   const postQuery = async () => {
     const curchat = { ...chats };
-    curchat.list[activeIdx].chat.push({ role: "user", content: query });
+    curchat.list[activeIdx].chat.push({ role: "user", content: query, cost: 0});
     setChats(curchat);
     setQuery("");
 
-    // 全ての会話履歴を投げると入力token量が凄い事になるので過去9件に制限
+    // token量を考慮し会話履歴を過去9件に絞ってリクエスト
     const last10chats = chats.list[activeIdx].chat.slice(-9);
     const stream = await openai.chat.completions.create({
       model: gptmodel,
       messages: last10chats as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
       stream: true,
+      stream_options: {
+        include_usage: true
+      }
     });
 
+    // レスポンス
+    let cost = 0
     let answer = "";
-    // stream=trueだとprompt_tokens, completion_tokensを取得できない
     for await (const chunk of stream) {
       answer += chunk.choices[0]?.delta?.content || "";
       setStreamAnswer(answer);
-    }
 
-    curchat.list[activeIdx].chat.push({ role: "assistant", content: answer });
+      if(chunk.usage !== null){
+        // 現在の為替レートでAPIコストを算出
+        cost = input_doller_per_token * (chunk.usage?.prompt_tokens ?? 0) + output_doller_per_token * (chunk.usage?.completion_tokens ?? 0);
+        cost = await Convert(cost).from("USD").to("JPY");
+      }
+    }
+    curchat.list[activeIdx].chat.push({role: "assistant", content: answer, cost: cost });
 
     setStreamAnswer("");
     setChats(curchat);
@@ -172,10 +187,14 @@ function App() {
             return (
               <div key={key} className="m-2 rounded-xl bg-slate-700">
                 <div className="text-sm p-2">
-                  {value.role === "assistant" ? "🧠 " + gptmodel : "💁 You"}
+                  {value.role === "assistant" ? `🧠 ${gptmodel}` : "💁 You"}
                 </div>
                 {/* <ReactMarkdown className="p-2">{value.content}</ReactMarkdown> */}
-                <div className="p-2">{value.content}</div>
+                <div className="p-2">
+                  {value.content}      
+                  <div className="p-2 text-red-400">
+                  {value.cost > 0 ? `[API料金: ${(value.cost).toFixed(2)}円]` : ""}</div>            
+                </div>
               </div>
             );
           })}
