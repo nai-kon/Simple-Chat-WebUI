@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from "react";
-import OpenAI from "openai";
-import { apikey } from "./openai-key.ts";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { Convert } from "easy-currencies";
+import OpenAI from "openai";
+import { useEffect, useRef, useState } from "react";
+import MarkdownRenderer from './CodeBlock.tsx';
+import { apikey } from "./openai-key.ts";
 
 
 // import ReactMarkdown from 'react-markdown';
@@ -191,9 +192,8 @@ function App() {
                 </div>
                 {/* <ReactMarkdown className="p-2">{value.content}</ReactMarkdown> */}
                 <div className="p-2">
-                  {value.content}      
-                  <div className="p-2 text-red-400">
-                  {value.cost > 0 ? `[API料金: ${(value.cost).toFixed(2)}円]` : ""}</div>            
+                  <MarkdownRenderer markdown={value.content}/>
+                  <div className="p-2 text-red-400">{value.cost > 0 ? `[API料金: ${(value.cost).toFixed(2)}円]` : ""}</div>            
                 </div>
               </div>
             );
@@ -206,7 +206,7 @@ function App() {
             }`}
           >
             <div className="text-sm p-2">{"🧠 " + gptmodel}</div>
-            <div className="p-2">{streamAnswer}</div>
+            <div className="p-2"><MarkdownRenderer markdown={streamAnswer}/></div>
           </div>
           {/* 自動スクロール用のダミー要素 */}
           <div id="lastelment" ref={messageEndRef} />

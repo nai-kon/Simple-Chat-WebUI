@@ -1,8 +1,21 @@
 # Private ChatGPT
 
-OpenAIのGPT-4のAPIを叩くChatGPT風アプリ。最近ChatGPTの利用頻度が低下し3000円のサブスクが勿体なく感じたので使った分だけ課金される様にしてみた。Vite+React+tailwindcssで構成。
+OpenAIのGPT-4oのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plusを利用していましたが、利用頻度的にAPIを直接叩いた方が安かったので、Vite+React+tailwindcssで自作しました。
+なるべく本家ChatGPTに近い動作にしています。
 
 ![overall.gif](overall.gif)
+
+## 主な機能
+
+* チャットの作成/削除
+* 応答のストリーミング出力
+* チャットのタイトルを自動生成
+* シンタックスハイライトに対応
+* API利用料を応答末尾に表示
+* チャット履歴はブラウザのローカルストレージに保存
+
+## 未対応機能
+* 画像の入出力
 
 
 ## Project setup
