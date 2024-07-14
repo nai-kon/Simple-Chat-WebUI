@@ -149,7 +149,7 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden text-white whitespace-pre-wrap whitespace-break-spaces">
+    <div className="flex h-screen overflow-hidden text-white">
       {/* sidebar */}
       <div className="bg-slate-800 overflow-auto w-52">
         <div className="italic text-center m-3 mb-5 text-xl">Private ChatGPT</div>

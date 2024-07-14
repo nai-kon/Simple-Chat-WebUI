@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+/* TailwindCSS環境下でmarkdownのスタイリングが無効化されないようにします */
+.markdown > * {
+  all: revert;
+}
