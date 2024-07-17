@@ -9,8 +9,8 @@ interface MarkdownRendererProps {
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ markdown }) => {
+  //  react-markdownとreact-syntax-highlighterで入力文字列をシンタックスハイライトする
   return (  
-    /* TailwindCSS環境下でmarkdownのスタイリングが無効化しないようにします (index.css参照) */
     <Markdown className="markdown"
       remarkPlugins={[remarkGfm]}
       children={markdown}
