@@ -19,10 +19,12 @@ OpenAIのGPT-4oのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plus
 
 
 ## Project setup
-```
+
+```bash
 npm install
 echo 'export const apikey = "XXXXXX";' > src/openai-key.ts
 ```
+put openai api key to `XXXXXX`
 
 ### Compiles and hot-reloads for development
 ```
