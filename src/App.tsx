@@ -25,7 +25,7 @@ const openai = new OpenAI({
 function App() {
   const [query, setQuery] = useState<string>("");
   const [streamAnswer, setStreamAnswer] = useState<string>("");
-  const [gptmodel, setGptModel] = useState<string>("");
+  const [gptmodel, setGptModel] = useState<string>("gpt-4o-mini");
   const [chats, setChats] = useState({
     list: [{ title: "", chat: [{ role: "", content: "" , model: "", cost: 0}] }],
   });
