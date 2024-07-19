@@ -7,12 +7,15 @@ import MarkdownRenderer from './CodeBlock.tsx';
 import { apikey } from "./openai-key.ts";
 
 
-const gptmodel = "gpt-4o";
 const localStrageKey = "chat-history";
-
 // pricing per token of GPT-4o (https://openai.com/api/pricing/)
-const input_doller_per_token = 5 / 1000000
-const output_doller_per_token = 15 / 1000000
+interface GptModel {
+  [name: string]: { input_doller_per_token: number; output_doller_per_token: number };
+}
+const gptmodels:GptModel = {
+  "gpt-4o-mini": { input_doller_per_token: 0.15 / 1000000, output_doller_per_token: 0.6 / 1000000 },
+  "gpt-4o": { input_doller_per_token: 5 / 1000000, output_doller_per_token: 15 / 1000000 },
+};
 
 const openai = new OpenAI({
   apiKey: apikey, // This is the default and can be omitted
@@ -22,8 +25,9 @@ const openai = new OpenAI({
 function App() {
   const [query, setQuery] = useState<string>("");
   const [streamAnswer, setStreamAnswer] = useState<string>("");
+  const [gptmodel, setGptModel] = useState<string>("");
   const [chats, setChats] = useState({
-    list: [{ title: "", chat: [{ role: "", content: "" , cost: 0}] }],
+    list: [{ title: "", chat: [{ role: "", content: "" , model: "", cost: 0}] }],
   });
   const messageEndRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState<number>(0);
@@ -43,6 +47,11 @@ function App() {
   useEffect(() => {
     scrollToLatest();
   }, [streamAnswer, activeIdx, query]);
+
+  const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const model = event.target.value;
+    setGptModel(model);
+  }
 
   const addNewChat = () => {
     setChats({
@@ -66,7 +75,6 @@ function App() {
 
     // インデックス再選択
     const newidx = curchat.list.length > idx ? idx : curchat.list.length - 1;
-    console.log(curchat.list.length, idx, newidx);
     setActiveIdx(newidx);
 
     // 保存
@@ -79,7 +87,7 @@ function App() {
 
   const postQuery = async () => {
     const curchat = { ...chats };
-    curchat.list[activeIdx].chat.push({ role: "user", content: query, cost: 0});
+    curchat.list[activeIdx].chat.push({ role: "user", content: query, model: gptmodel, cost: 0});
     setChats(curchat);
     setQuery("");
 
@@ -103,11 +111,12 @@ function App() {
 
       if(chunk.usage !== null){
         // 現在の為替レートでAPIコストを算出
-        cost = input_doller_per_token * (chunk.usage?.prompt_tokens ?? 0) + output_doller_per_token * (chunk.usage?.completion_tokens ?? 0);
+        cost = gptmodels[gptmodel].input_doller_per_token * (chunk.usage?.prompt_tokens ?? 0) + 
+              gptmodels[gptmodel].output_doller_per_token * (chunk.usage?.completion_tokens ?? 0);
         cost = await Convert(cost).from("USD").to("JPY");
       }
     }
-    curchat.list[activeIdx].chat.push({role: "assistant", content: answer, cost: cost });
+    curchat.list[activeIdx].chat.push({role: "assistant", content: answer, model: gptmodel, cost: cost });
 
     setStreamAnswer("");
     setChats(curchat);
@@ -121,7 +130,7 @@ function App() {
 
   const setChatTitle = async () => {
     const completion = await openai.chat.completions.create({
-      model: gptmodel,
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
@@ -151,14 +160,23 @@ function App() {
     <div className="flex h-screen overflow-hidden text-white">
       {/* sidebar */}
       <div className="bg-slate-800 overflow-auto w-52">
-        <div className="italic text-center m-3 mb-5 text-xl">Private ChatGPT</div>
+        <div className="italic text-center m-3 text-xl">Private ChatGPT</div>      
+        {/* gpt-model select */}
+        <select value={gptmodel} onChange={handleModelChange} className="flex mx-auto bg-slate-800 text-center mb-5">
+          {Object.keys(gptmodels).map(model => (
+            <option key={model} value={model}>{model}</option>
+          ))}
+        </select>
         <ul>
+          {/* newchat */}
           <li
             className="flex p-3 text-green-500 hover:bg-slate-600 hover:cursor-pointer"
             onClick={() => addNewChat()}
           >
             <AddIcon /> 新しいチャット
           </li>
+
+          {/* chat histories */}
           {chats.list.reverse().map((value, key) => {
             return (
               <li
@@ -180,14 +198,15 @@ function App() {
           })}
         </ul>
       </div>
-
+      
+      {/* chat UI */}
       <div className="flex-1 flex flex-col bg-slate-600">
         <div className="flex-1 overflow-auto">
           {chats.list[activeIdx]?.chat.map((value, key) => {
             return (
               <div key={key} className="m-2 rounded-xl bg-slate-700">
                 <div className="text-sm p-2">
-                  {value.role === "assistant" ? `🧠 ${gptmodel}` : "💁 You"}
+                  {value.role === "assistant" ? `🧠 ${value.model}` : "💁 You"}
                 </div>
                 {/* <ReactMarkdown className="p-2">{value.content}</ReactMarkdown> */}
                 <div className="p-2">
