@@ -27,7 +27,7 @@ function App() {
   const [streamAnswer, setStreamAnswer] = useState<string>("");
   const [gptmodel, setGptModel] = useState<string>("gpt-4o-mini");
   const [chats, setChats] = useState({
-    list: [{ title: "", chat: [{ role: "", content: "" , model: "", cost: 0}] }],
+    list: [{ title: "New Chat", chat: [] }],
   });
   const messageEndRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState<number>(0);
@@ -37,7 +37,9 @@ function App() {
     const chatHistory = JSON.parse(
       localStorage.getItem(localStrageKey) || `{"list":[]}`
     );
-    setChats(chatHistory);
+    if (chatHistory.list.length){
+      setChats(chatHistory);
+    }
     // fetch("./chat-history.json")
     //   .then((res) => res.json())
     //   .then((data) => setChats(data));
