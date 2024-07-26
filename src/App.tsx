@@ -23,7 +23,7 @@ const openai = new OpenAI({
 });
 
 function App() {
-  const [query, setQuery] = useState<string>("");
+  const inputFormRef = useRef<HTMLTextAreaElement>(null);
   const [streamAnswer, setStreamAnswer] = useState<string>("");
   const [gptmodel, setGptModel] = useState<string>("gpt-4o-mini");
   const [chats, setChats] = useState({
@@ -48,13 +48,14 @@ function App() {
   // 最下部までスクロール
   useEffect(() => {
     scrollToLatest();
-  }, [streamAnswer, activeIdx, query]);
+  }, [activeIdx, streamAnswer, chats]);
 
   const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const model = event.target.value;
     setGptModel(model);
   }
 
+  // チャットの追加
   const addNewChat = () => {
     setChats({
       list: [{ title: "New Chat", chat: [] }, ...chats["list"]],
@@ -62,8 +63,8 @@ function App() {
     setActiveIdx(0);
   };
 
+  // チャット履歴をローカルストレージに保存
   const saveChat = () => {
-    // ローカルストレージに保存
     localStorage.setItem(localStrageKey, JSON.stringify(chats));
   };
 
@@ -79,19 +80,20 @@ function App() {
     const newidx = curchat.list.length > idx ? idx : curchat.list.length - 1;
     setActiveIdx(newidx);
 
-    // 保存
+    // チャット履歴保存
     saveChat();
   };
 
+  // 最下要素への自動スクロール
   const scrollToLatest = () => {
     messageEndRef?.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const postQuery = async () => {
+  const postQuery = async (query: string) => {
+    // 質問文の表示
     const curchat = { ...chats };
-    curchat.list[activeIdx].chat.push({ role: "user", content: query, model: gptmodel, cost: 0});
+    curchat.list[activeIdx].chat.push({ role: "user", content: query, model: "", cost: 0});
     setChats(curchat);
-    setQuery("");
 
     // token量を考慮し会話履歴を過去9件に絞ってリクエスト
     const last10chats = chats.list[activeIdx].chat.slice(-9);
@@ -125,12 +127,13 @@ function App() {
 
     // チャット名がNew Chatの場合はタイトルを付ける
     if (curchat.list[activeIdx].title === "New Chat") {
-      await setChatTitle();
+      await setChatTitle(query);
     }
     saveChat();
   };
 
-  const setChatTitle = async () => {
+  // サイドバーのチャットタイトルの自動設定
+  const setChatTitle = async (query: string) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -151,9 +154,12 @@ function App() {
     }
   };
 
+  // 入力フォームでの確定押下
   const enterSubmit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key == "Enter" && !e.shiftKey) {
-      postQuery();
+    if (e.key == "Enter" && !e.shiftKey && inputFormRef.current !== null) {
+      const query = inputFormRef.current.value;
+      inputFormRef.current.value = "";
+      postQuery(query);
       e.preventDefault();
     }
   };
@@ -233,9 +239,8 @@ function App() {
         </div>
         <textarea
           className="bg-slate-200 rounded-lg p-1 m-2 text-black resize-none"
-          value={query}
           rows={3}
-          onChange={(e) => setQuery(e.target.value)}
+          ref={inputFormRef}
           onKeyDown={enterSubmit}
           placeholder="ここに入力... Enterで送信"
         />
