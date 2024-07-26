@@ -68,9 +68,9 @@ function App() {
     localStorage.setItem(localStrageKey, JSON.stringify(chats));
   };
 
-  // サイドバーの項目削除
-  const delIndex = (idx: number) => {
-    if (!window.confirm("Delete Chat?")) return;
+  // サイドバーのチャット履歴削除
+  const delWholeChat = (idx: number) => {
+    if (!window.confirm("Delete this chat history?")) return;
 
     const curchat = { ...chats };
     curchat.list.splice(idx, 1);
@@ -79,6 +79,18 @@ function App() {
     // インデックス再選択
     const newidx = curchat.list.length > idx ? idx : curchat.list.length - 1;
     setActiveIdx(newidx);
+
+    // チャット履歴保存
+    saveChat();
+  };
+
+  // チャットの会話削除
+  const delChat = (idx: number) => {
+    if (!window.confirm("Delete this chat?")) return;
+
+    const curchat = { ...chats };
+    curchat.list[activeIdx].chat.splice(idx, 1);
+    setChats(curchat);
 
     // チャット履歴保存
     saveChat();
@@ -198,8 +210,9 @@ function App() {
               >
                 {value.title}
                 <DeleteOutlineIcon
+                  titleAccess="削除"
                   className="p-1 ml-auto hover:text-red-500 hover:cursor-pointer hover:p-0"
-                  onClick={() => delIndex(key)}
+                  onClick={() => delWholeChat(key)}
                 />
               </li>
             );
@@ -213,8 +226,13 @@ function App() {
           {chats.list[activeIdx]?.chat.map((value, key) => {
             return (
               <div key={key} className="m-2 rounded-xl bg-slate-700">
-                <div className="text-sm p-2">
+                <div className="text-sm p-2 flex justify-between">
                   {value.role === "assistant" ? `🧠 ${value.model}` : "💁 You"}
+                  <DeleteOutlineIcon
+                    titleAccess="削除"
+                    className="p-1 ml-auto hover:text-red-500 hover:cursor-pointer hover:p-0"
+                    onClick={() => delChat(key)}
+                  />
                 </div>
                 {/* <ReactMarkdown className="p-2">{value.content}</ReactMarkdown> */}
                 <div className="p-2">
@@ -224,8 +242,8 @@ function App() {
               </div>
             );
           })}
-          {/* streamの回答をsetChatsしても描画されないので(全チャット履歴につき更新差分チェックが大変だから？)、回答用に専用のdivを設けます
-          streamが終われば回答をsetchatsして、こちらはinvisibleにする */}
+          {/* チャット履歴が長くなるとstream出力の更新が重いので回答用の専用divを設けます。
+          streamが終われば回答をチャット履歴に追加して、こちらはinvisibleにする */}
           <div
             className={`rounded-xl m-2 bg-slate-700 ${
               streamAnswer.length === 0 ? "hidden" : ""
