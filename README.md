@@ -1,4 +1,4 @@
-# Private ChatGPT
+# Simple Chat WebUI
 
 OpenAIのGPT-4oのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plusを利用していましたが、利用頻度的にAPIを直接叩いた方が安かったので、Vite+React+tailwindcssで自作しました。
 なるべく本家ChatGPTに近い動作にしています。
@@ -8,7 +8,7 @@ OpenAIのGPT-4oのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plus
 ## 主な機能
 
 * チャットの作成/削除
- * 個別の会話も削除できるため、会話の流れがおかしくなった時に途中からやり直せます
+  * 個別の会話も削除できるため、会話の流れがおかしくなった時に途中からやり直せます
 * 応答のストリーミング出力
 * チャットのタイトルを自動生成
 * シンタックスハイライト対応
