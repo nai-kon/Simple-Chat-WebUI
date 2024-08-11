@@ -56,7 +56,12 @@ function App() {
     setGptModel(model);
   }
 
-  // チャットの追加
+  // チャット履歴をローカルストレージに保存
+  const saveChat = () => {
+    localStorage.setItem(localStrageKey, JSON.stringify(chats));
+  };
+
+  // サイドバーにチャット追加
   const addNewChat = () => {
     setChats({
       list: [{ title: "New Chat", chat: [] }, ...chats["list"]],
@@ -64,12 +69,7 @@ function App() {
     setActiveIdx(0);
   };
 
-  // チャット履歴をローカルストレージに保存
-  const saveChat = () => {
-    localStorage.setItem(localStrageKey, JSON.stringify(chats));
-  };
-
-  // サイドバーのチャット履歴削除
+  // サイドバーのチャット削除
   const delWholeChat = (idx: number) => {
     if (!window.confirm("Delete this chat history?")) return;
 
@@ -85,7 +85,7 @@ function App() {
     saveChat();
   };
 
-  // チャットの会話削除
+  // チャットの個別会話削除
   const delChat = (idx: number) => {
     if (!window.confirm("Delete this chat?")) return;
 
@@ -198,7 +198,7 @@ function App() {
           </li>
 
           {/* chat histories */}
-          {chats.list.reverse().map((value, key) => {
+          {chats.list.map((value, key) => {
             return (
               <li
                 key={key}
