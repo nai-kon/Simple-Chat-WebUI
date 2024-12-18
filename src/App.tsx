@@ -14,8 +14,8 @@ interface GptModel {
 }
 const gptmodels:GptModel = {
   "gpt-4o-mini": { input_doller_per_token: 0.15 / 1000000, output_doller_per_token: 0.6 / 1000000 },
-  "gpt-4o": { input_doller_per_token: 5 / 1000000, output_doller_per_token: 15 / 1000000 },
-  "gpt-4o-2024-08-06": { input_doller_per_token: 2.5 / 1000000, output_doller_per_token: 10 / 1000000 },
+  "gpt-4o": { input_doller_per_token: 2.5 / 1000000, output_doller_per_token: 10 / 1000000 },
+  "gpt-4o-2024-05-13": { input_doller_per_token: 5 / 1000000, output_doller_per_token: 10 / 1000000 },
 };
 
 const openai = new OpenAI({
