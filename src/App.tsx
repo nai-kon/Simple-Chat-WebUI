@@ -13,8 +13,10 @@ interface GptModel {
   [name: string]: { input_doller: number; cached_input_doller: number, output_doller: number };
 }
 const gptmodels:GptModel = {
-  "gpt-4o-mini": { input_doller: 0.15 / 1000000, cached_input_doller: 0.075 / 1000000, output_doller: 0.6 / 1000000 },
   "gpt-4o": { input_doller: 2.5 / 1000000, cached_input_doller: 1.25 / 1000000, output_doller: 10 / 1000000 },
+  "gpt-4o-mini": { input_doller: 0.15 / 1000000, cached_input_doller: 0.075 / 1000000, output_doller: 0.6 / 1000000 },
+  "o1": { input_doller: 15 / 1000000, cached_input_doller: 7.5 / 1000000, output_doller: 60 / 1000000 },
+  "o3-mini": { input_doller: 1.1 / 1000000, cached_input_doller: 0.55 / 1000000, output_doller: 4.4 / 1000000 },
 };
 
 const openai = new OpenAI({
@@ -116,6 +118,10 @@ function App() {
       stream_options: {
         include_usage: true
       }
+    })
+    .catch(e => {
+      alert(e);  // o1モデルはtier3以降のユーザーが対象でエラーになる場合がある
+      return;
     });
 
     // レスポンス
