@@ -7,15 +7,14 @@ import MarkdownRenderer from './CodeBlock.tsx';
 import { apikey } from "./openai-key.ts";
 
 
-const localStrageKey = "chat-history";
+const localStorageKey = "chat-history";
 // pricing per token of GPT-4o (https://openai.com/api/pricing/)
 interface GptModel {
-  [name: string]: { input_doller_per_token: number; output_doller_per_token: number };
+  [name: string]: { input_doller: number; cached_input_doller: number, output_doller: number };
 }
 const gptmodels:GptModel = {
-  "gpt-4o-mini": { input_doller_per_token: 0.15 / 1000000, output_doller_per_token: 0.6 / 1000000 },
-  "gpt-4o": { input_doller_per_token: 2.5 / 1000000, output_doller_per_token: 10 / 1000000 },
-  "gpt-4o-2024-05-13": { input_doller_per_token: 5 / 1000000, output_doller_per_token: 10 / 1000000 },
+  "gpt-4o-mini": { input_doller: 0.15 / 1000000, cached_input_doller: 0.075 / 1000000, output_doller: 0.6 / 1000000 },
+  "gpt-4o": { input_doller: 2.5 / 1000000, cached_input_doller: 1.25 / 1000000, output_doller: 10 / 1000000 },
 };
 
 const openai = new OpenAI({
@@ -36,7 +35,7 @@ function App() {
   // chat履歴の読み込み
   useEffect(() => {
     const chatHistory = JSON.parse(
-      localStorage.getItem(localStrageKey) || `{"list":[]}`
+      localStorage.getItem(localStorageKey) || `{"list":[]}`
     );
     if (chatHistory.list.length){
       setChats(chatHistory);
@@ -58,7 +57,7 @@ function App() {
 
   // チャット履歴をローカルストレージに保存
   const saveChat = () => {
-    localStorage.setItem(localStrageKey, JSON.stringify(chats));
+    localStorage.setItem(localStorageKey, JSON.stringify(chats));
   };
 
   // サイドバーにチャット追加
@@ -128,8 +127,12 @@ function App() {
 
       if(chunk.usage !== null){
         // 現在の為替レートでAPIコストを算出
-        cost = gptmodels[gptmodel].input_doller_per_token * (chunk.usage?.prompt_tokens ?? 0) + 
-              gptmodels[gptmodel].output_doller_per_token * (chunk.usage?.completion_tokens ?? 0);
+        const input_tokens = (chunk.usage?.prompt_tokens ?? 0)
+        const cached_input_tokens = (chunk.usage?.prompt_tokens_details?.cached_tokens ?? 0)
+        const output_tokens = (chunk.usage?.completion_tokens ?? 0)
+        cost = gptmodels[gptmodel].input_doller * (input_tokens - cached_input_tokens) + 
+               gptmodels[gptmodel].cached_input_doller * cached_input_tokens + 
+               gptmodels[gptmodel].output_doller * output_tokens;
         cost = await Convert(cost).from("USD").to("JPY");
       }
     }
