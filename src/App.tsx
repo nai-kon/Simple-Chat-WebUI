@@ -136,7 +136,6 @@ function App() {
         const input_tokens = (chunk.usage?.prompt_tokens ?? 0)
         const cached_input_tokens = (chunk.usage?.prompt_tokens_details?.cached_tokens ?? 0)
         const output_tokens = (chunk.usage?.completion_tokens ?? 0)
-        console.log("input_tokens", input_tokens, "cached_input_tokens", cached_input_tokens, "output_tokens", output_tokens)
         cost = gptmodels[gptmodel].input_doller * (input_tokens - cached_input_tokens) + 
                gptmodels[gptmodel].cached_input_doller * cached_input_tokens + 
                gptmodels[gptmodel].output_doller * output_tokens;
