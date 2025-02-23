@@ -110,10 +110,10 @@ function App() {
     setChats(curchat);
 
     // token量を考慮し会話履歴を過去9件に絞ってリクエスト
-    const last10chats = chats.list[activeIdx].chat.slice(-9);
+    const last9chats = chats.list[activeIdx].chat.slice(-9);
     const stream = await openai.chat.completions.create({
       model: gptmodel,
-      messages: last10chats as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+      messages: last9chats as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
       stream: true,
       stream_options: {
         include_usage: true
@@ -136,6 +136,7 @@ function App() {
         const input_tokens = (chunk.usage?.prompt_tokens ?? 0)
         const cached_input_tokens = (chunk.usage?.prompt_tokens_details?.cached_tokens ?? 0)
         const output_tokens = (chunk.usage?.completion_tokens ?? 0)
+        console.log("input_tokens", input_tokens, "cached_input_tokens", cached_input_tokens, "output_tokens", output_tokens)
         cost = gptmodels[gptmodel].input_doller * (input_tokens - cached_input_tokens) + 
                gptmodels[gptmodel].cached_input_doller * cached_input_tokens + 
                gptmodels[gptmodel].output_doller * output_tokens;
