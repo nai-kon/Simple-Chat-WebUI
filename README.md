@@ -13,7 +13,7 @@ OpenAIのGPT-4oのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plus
 * チャットのタイトルを自動生成
 * シンタックスハイライト対応
 * モデルの切り替え (GPT-4o, GPT-4o-mini)
-* API利用料の表示
+* API利用料の表示 (Prompt Caching対応)
 * チャット履歴はブラウザのローカルストレージに保存
 
 ## 未対応機能
