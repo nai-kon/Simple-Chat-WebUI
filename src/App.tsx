@@ -4,20 +4,12 @@ import { Convert } from "easy-currencies";
 import OpenAI from "openai";
 import { useEffect, useRef, useState } from "react";
 import MarkdownRenderer from './CodeBlock.tsx';
+import GptModels from "./GptModels.ts";
 import { apikey } from "./openai-key.ts";
 
 
 const localStorageKey = "chat-history";
 // pricing per token of GPT-4o (https://openai.com/api/pricing/)
-interface GptModel {
-  [name: string]: { input_doller: number; cached_input_doller: number, output_doller: number };
-}
-const gptmodels:GptModel = {
-  "gpt-4o": { input_doller: 2.5 / 1000000, cached_input_doller: 1.25 / 1000000, output_doller: 10 / 1000000 },
-  "gpt-4o-mini": { input_doller: 0.15 / 1000000, cached_input_doller: 0.075 / 1000000, output_doller: 0.6 / 1000000 },
-  "o1": { input_doller: 15 / 1000000, cached_input_doller: 7.5 / 1000000, output_doller: 60 / 1000000 },
-  "o3-mini": { input_doller: 1.1 / 1000000, cached_input_doller: 0.55 / 1000000, output_doller: 4.4 / 1000000 },
-};
 
 const openai = new OpenAI({
   apiKey: apikey, // This is the default and can be omitted
@@ -136,9 +128,9 @@ function App() {
         const input_tokens = (chunk.usage?.prompt_tokens ?? 0)
         const cached_input_tokens = (chunk.usage?.prompt_tokens_details?.cached_tokens ?? 0)
         const output_tokens = (chunk.usage?.completion_tokens ?? 0)
-        cost = gptmodels[gptmodel].input_doller * (input_tokens - cached_input_tokens) + 
-               gptmodels[gptmodel].cached_input_doller * cached_input_tokens + 
-               gptmodels[gptmodel].output_doller * output_tokens;
+        cost = GptModels[gptmodel].input_doller * (input_tokens - cached_input_tokens) + 
+               GptModels[gptmodel].cached_input_doller * cached_input_tokens + 
+               GptModels[gptmodel].output_doller * output_tokens;
         cost = await Convert(cost).from("USD").to("JPY");
       }
     }
@@ -193,7 +185,7 @@ function App() {
         <div className="italic text-center m-3 text-xl">Private ChatGPT</div>      
         {/* gpt-model select */}
         <select value={gptmodel} onChange={handleModelChange} className="flex mx-auto bg-slate-800 text-center mb-5">
-          {Object.keys(gptmodels).map(model => (
+          {Object.keys(GptModels).map(model => (
             <option key={model} value={model}>{model}</option>
           ))}
         </select>

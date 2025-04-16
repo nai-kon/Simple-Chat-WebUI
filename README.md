@@ -1,6 +1,6 @@
 # Simple Chat WebUI
 
-OpenAIのGPT-4oのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plusを利用していましたが、利用頻度的にAPIを直接叩いた方が安かったので、Vite+React+TailwindCSSで自作しました。
+OpenAIのGPTのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plusを利用していましたが、利用頻度的にAPIを直接叩いた方が安かったので、Vite+React+TailwindCSSで自作しました。
 なるべく本家ChatGPTに近い動作にしています。
 
 ![demo.gif](demo.gif)
@@ -12,7 +12,7 @@ OpenAIのGPT-4oのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plus
 * 応答のストリーミング出力
 * チャットのタイトルを自動生成
 * シンタックスハイライト対応
-* モデルの切り替え (GPT-4o, GPT-4o-mini)
+* モデルの切り替え (GPT-4.1系, GPT-4o系)
 * API利用料の表示 (Prompt Caching対応)
 * チャット履歴はブラウザのローカルストレージに保存
 
