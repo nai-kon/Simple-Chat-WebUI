@@ -5,21 +5,19 @@ import OpenAI from "openai";
 import { useEffect, useRef, useState } from "react";
 import MarkdownRenderer from './CodeBlock.tsx';
 import GptModels from "./GptModels.ts";
-import { apikey } from "./openai-key.ts";
 
 
 const localStorageKey = "chat-history";
-// pricing per token of GPT-4o (https://openai.com/api/pricing/)
 
 const openai = new OpenAI({
-  apiKey: apikey, // This is the default and can be omitted
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY, // This is the default and can be omitted
   dangerouslyAllowBrowser: true,
 });
 
 function App() {
   const inputFormRef = useRef<HTMLTextAreaElement>(null);
   const [streamAnswer, setStreamAnswer] = useState<string>("");
-  const [gptmodel, setGptModel] = useState<string>("gpt-4o-mini");
+  const [modelName, setGptModel] = useState<string>("gpt-4.1");
   const [chats, setChats] = useState({
     list: [{ title: "New Chat", chat: [] }],
   });
@@ -104,7 +102,7 @@ function App() {
     // token量を考慮し会話履歴を過去9件に絞ってリクエスト
     const last9chats = chats.list[activeIdx].chat.slice(-9);
     const stream = await openai.chat.completions.create({
-      model: gptmodel,
+      model: modelName,
       messages: last9chats as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
       stream: true,
       stream_options: {
@@ -128,13 +126,13 @@ function App() {
         const input_tokens = (chunk.usage?.prompt_tokens ?? 0)
         const cached_input_tokens = (chunk.usage?.prompt_tokens_details?.cached_tokens ?? 0)
         const output_tokens = (chunk.usage?.completion_tokens ?? 0)
-        cost = GptModels[gptmodel].input_doller * (input_tokens - cached_input_tokens) + 
-               GptModels[gptmodel].cached_input_doller * cached_input_tokens + 
-               GptModels[gptmodel].output_doller * output_tokens;
+        cost = GptModels[modelName].input_doller * (input_tokens - cached_input_tokens) + 
+               GptModels[modelName].cached_input_doller * cached_input_tokens + 
+               GptModels[modelName].output_doller * output_tokens;
         cost = await Convert(cost).from("USD").to("JPY");
       }
     }
-    curchat.list[activeIdx].chat.push({role: "assistant", content: answer, model: gptmodel, cost: cost });
+    curchat.list[activeIdx].chat.push({role: "assistant", content: answer, model: modelName, cost: cost });
 
     setStreamAnswer("");
     setChats(curchat);
@@ -184,7 +182,7 @@ function App() {
       <div className="bg-slate-800 overflow-auto w-52">
         <div className="italic text-center m-3 text-xl">Private ChatGPT</div>      
         {/* gpt-model select */}
-        <select value={gptmodel} onChange={handleModelChange} className="flex mx-auto bg-slate-800 text-center mb-5">
+        <select value={modelName} onChange={handleModelChange} className="flex mx-auto bg-slate-800 text-center mb-5">
           {Object.keys(GptModels).map(model => (
             <option key={model} value={model}>{model}</option>
           ))}
@@ -251,7 +249,7 @@ function App() {
               streamAnswer.length === 0 ? "hidden" : ""
             }`}
           >
-            <div className="text-sm p-2">{"🧠 " + gptmodel}</div>
+            <div className="text-sm p-2">{"🧠 " + modelName}</div>
             <div className="p-2"><MarkdownRenderer markdown={streamAnswer}/></div>
           </div>
           {/* 自動スクロール用のダミー要素 */}

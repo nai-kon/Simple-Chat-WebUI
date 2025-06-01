@@ -22,13 +22,14 @@ OpenAIのGPTのAPIを叩くChatGPT風アプリ。月額3000円でChatGPT Plusを
 
 ## Project setup
 
+Create a `.env` file and put following information:
+
+```dotenv
+VITE_OPENAI_API_KEY="XXXX"
+```
+
+Install dependencies and start app.
 ```bash
 npm install
-echo 'export const apikey = "XXXXXX";' > src/openai-key.ts
-```
-put openai api key to `XXXXXX`
-
-### Compiles and hot-reloads for development
-```
 npm run dev
 ```
