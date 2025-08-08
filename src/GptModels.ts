@@ -10,6 +10,16 @@ interface GptModel {
 
 const million: number = 1000000;
 const GptModels: GptModel = {
+  "gpt-5": {
+    input_doller: 1.25 / million,
+    cached_input_doller: 0.125 / million,
+    output_doller: 10 / million,
+  },
+  "gpt-5-mini": {
+    input_doller: 0.25 / million,
+    cached_input_doller: 0.025 / million,
+    output_doller: 2 / million,
+  },
   "gpt-4.1": {
     input_doller: 2 / million,
     cached_input_doller: 0.5 / million,
