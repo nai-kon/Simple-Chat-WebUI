@@ -17,7 +17,7 @@ const openai = new OpenAI({
 function App() {
   const inputFormRef = useRef<HTMLTextAreaElement>(null);
   const [streamAnswer, setStreamAnswer] = useState<string>("");
-  const [modelName, setGptModel] = useState<string>("gpt-4.1");
+  const [modelName, setGptModel] = useState<string>("gpt-5");
   const [chats, setChats] = useState({
     list: [{ title: "New Chat", chat: [] }],
   });
@@ -62,7 +62,7 @@ function App() {
 
   // サイドバーのチャット削除
   const delWholeChat = (idx: number) => {
-    if (!window.confirm("Delete this chat history?")) return;
+    if (chats.list[idx].chat.length && !window.confirm("Delete this chat history?")) return;
 
     const curchat = { ...chats };
     curchat.list.splice(idx, 1);
