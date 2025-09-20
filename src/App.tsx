@@ -258,8 +258,7 @@ function App() {
           <div id="lastelment" ref={messageEndRef} /></div>
         {/* 入力フォーム */}
         <textarea
-          className="bg-slate-200 rounded-lg p-1 m-2 text-black resize-none"
-          rows={3}
+          className="bg-slate-200 rounded-lg p-1 m-2 text-black resize-none field-sizing-content min-h-[3lh] max-h-2/3"
           ref={inputFormRef}
           onKeyDown={enterSubmit}
           placeholder="ここに入力... Enterで送信"
