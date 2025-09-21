@@ -21,6 +21,7 @@ function App() {
   const [modelName, setGptModel] = useState<string>("gpt-5");
   const [chats, setChats] = useState<Chat[]>([]);
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState<number>(0);
 
   // chat履歴の読み込み
@@ -40,7 +41,7 @@ function App() {
   // 最下部までスクロール
   useEffect(() => {
     scrollToLatest();
-  }, [activeIdx, streamAnswer, chats]);
+  }, [streamAnswer, chats]);
 
   const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const model = event.target.value;
@@ -84,9 +85,16 @@ function App() {
     saveChat();
   };
 
-  // 最下要素への自動スクロール
+  // テキスト生成時の自動スクロール
   const scrollToLatest = () => {
-    messageEndRef?.current?.scrollIntoView({ behavior: "smooth" });
+    const obj = chatScrollRef?.current;
+    if (!obj) return;
+
+    // 現在のスクロール位置が最下部の10行目以内なら自動スクロール
+    const lineHeight = parseFloat(window.getComputedStyle(obj).lineHeight);
+    if (obj.scrollHeight - Math.round(obj.scrollTop) - obj.clientHeight < lineHeight * 10) {
+      messageEndRef?.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const postQuery = async (query: string) => {
@@ -220,7 +228,7 @@ function App() {
       
       {/* chat UI */}
       <div className="flex-1 flex flex-col bg-slate-600">
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto"  ref={chatScrollRef}>
           {chats[activeIdx]?.chat.map((value, key) => {
             return (
               <div key={key} className="m-2 p-2 rounded-xl bg-slate-700">
