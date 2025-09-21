@@ -49,7 +49,7 @@ function App() {
   }
 
   // チャット履歴をローカルストレージに保存
-  const saveChat = () => {
+  const saveChat = (chats: Chat[]) => {
     localStorage.setItem(localStorageKey, JSON.stringify(chats));
   };
 
@@ -63,14 +63,16 @@ function App() {
   const delWholeChat = (idx: number) => {
     if (chats[idx].chat.length && !window.confirm("Delete this chat history?")) return;
 
-    setChats(chats.filter((_, i) => i !== idx));
+    const curchat = [ ...chats ];
+    curchat.splice(idx, 1);
+    setChats(curchat);
 
     // インデックス再選択
     const newidx = chats.length > idx ? idx : chats.length - 1;
     setActiveIdx(newidx);
 
     // チャット履歴保存
-    saveChat();
+    saveChat(curchat);
   };
 
   // チャットの個別会話削除
@@ -82,17 +84,17 @@ function App() {
     setChats(curchat);
 
     // チャット履歴保存
-    saveChat();
+    saveChat(curchat);
   };
 
   // テキスト生成時の自動スクロール
   const scrollToLatest = () => {
-    const obj = chatScrollRef?.current;
-    if (!obj) return;
+    const elm = chatScrollRef?.current;
+    if (!elm) return;
 
     // 現在のスクロール位置が最下部の10行目以内なら自動スクロール
-    const lineHeight = parseFloat(window.getComputedStyle(obj).lineHeight);
-    if (obj.scrollHeight - Math.round(obj.scrollTop) - obj.clientHeight < lineHeight * 10) {
+    const lineHeight = parseFloat(window.getComputedStyle(elm).lineHeight);
+    if (elm.scrollHeight - Math.round(elm.scrollTop) - elm.clientHeight < lineHeight * 10) {
       messageEndRef?.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
@@ -147,7 +149,7 @@ function App() {
     if (curchat[activeIdx].title === "New Chat") {
       await setChatTitle(query);
     }
-    saveChat();
+    saveChat(curchat);
   };
 
   // サイドバーのチャットタイトルの自動設定
